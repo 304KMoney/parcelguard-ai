@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { FileText, Download, ExternalLink, ArrowRight } from "lucide-react";
+import { FileText, Download, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";

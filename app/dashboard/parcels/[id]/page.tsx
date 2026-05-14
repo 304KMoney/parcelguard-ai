@@ -12,8 +12,7 @@ import {
   Info,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
-import { RiskBadge, RiskGauge, TrustBadge } from "@/components/parcels/risk-badge";
+import { RiskGauge, TrustBadge } from "@/components/parcels/risk-badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ScoreButton } from "./score-button";
 import { ReportButton } from "./report-button";

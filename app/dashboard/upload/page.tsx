@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface UploadResult {
   success: boolean;
@@ -311,9 +312,9 @@ export default function UploadPage() {
               )}
               {result.success && (
                 <div className="mt-3 flex gap-3">
-                  <a href="/dashboard/parcels" className="text-sm text-indigo-400 hover:text-indigo-300">
+                  <Link href="/dashboard/parcels" className="text-sm text-indigo-400 hover:text-indigo-300">
                     View parcels →
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
