@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  clerkId         String    @unique
+  email           String    @unique
+  fullName        String?
+  plan            String    @default("starter") // starter, pro, team, desk
+  aiCreditsUsed   Int       @default(0)
+  aiCreditsLimit  Int       @default(50)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  parcels   Parcel[]
+  reports   Report[]
+
+  @@map("users")
+}
+
+model Parcel {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Core Identifiers
+  parcelId        String?   // APN / parcel number
+  county          String?
+  state           String?
+
+  // Ownership
+  ownerName       String?
+  ownerEntityType String?   // individual, llc, trust, estate, deceased, unknown
+
+  // Property Location
+  situsAddress    String?
+  city            String?
+  zip             String?
+
+  // Property Data
+  propertyType    String?   // residential, commercial, industrial, vacant_land, agricultural, mixed, unknown
+  legalDescription String?
+
+  // Financial Data
+  assessedValue   Float?
+  taxAmountOwed   Float?
+  openingBid      Float?
+
+  // Sale Data
+  saleDate        DateTime?
+  auctionType     String?   // lien, deed, redeemable_deed, unknown
+  auctionPlatform String?
+  redemptionPeriod String?
+
+  // Source & Meta
+  sourceFileName  String?
+  uploadDate      DateTime  @default(now())
+  missingFields   Json?     // array of missing field names
+  decisionStatus  String    @default("watch") // watch, research, avoid, bid_candidate
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  score           ParcelScore?
+  conflictFlags   ConflictFlag[]
+  reports         Report[]
+
+  @@index([userId])
+  @@index([state, county])
+  @@map("parcels")
+}
+
+model ParcelScore {
+  id              String    @id @default(cuid())
+  parcelId        String    @unique
+  parcel          Parcel    @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  dealRiskScore   Int       // 0-100 (higher = riskier)
+  sourceTrustScore Int      // 0-100 (higher = better quality)
+  maxBidAmount    Float?
+  aiNarrative     String?   @db.Text
+  topRiskDrivers  Json?     // [{driver, category, severity, explanation}]
+  scoredAt        DateTime  @default(now())
+
+  @@map("parcel_scores")
+}
+
+model ConflictFlag {
+  id           String    @id @default(cuid())
+  parcelId     String
+  parcel       Parcel    @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+
+  flagType     String    // address_mismatch, owner_mismatch, parcel_id_conflict, etc.
+  severity     String    // info, warn, alert, stop
+  title        String
+  description  String    @db.Text
+  whatToDo     String?   @db.Text
+  isResolved   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@index([parcelId])
+  @@map("conflict_flags")
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  parcelId    String
+  parcel      Parcel    @relation(fields: [parcelId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  blobUrl     String?
+  title       String?
+  status      String    @default("generating") // generating, ready, failed
+  generatedAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([parcelId])
+  @@map("reports")
+}

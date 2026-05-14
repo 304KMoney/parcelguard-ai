@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run db:generate && npm run build",
+  "framework": "nextjs",
+  "installCommand": "npm install"
+}
